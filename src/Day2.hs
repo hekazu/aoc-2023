@@ -1,6 +1,7 @@
 module Day2 where
 
 import Data.List
+import Data.Bifunctor (first)
 import Data.Char (isAlpha)
 import Data.Tuple (swap)
 import qualified Data.Map as M
@@ -37,7 +38,7 @@ part2 = do
 gamePower :: String -> Int
 gamePower =  product . M.elems . M.fromListWith max . map toAssocList . prepareGameInfo
   where
-    toAssocList = (\(dirtyColour,x) -> (filter isAlpha dirtyColour,x)) . swap
+    toAssocList = first (filter isAlpha) . swap
 
 prepareGameInfo :: String -> [(Int, String)]
 prepareGameInfo = pairs . drop 2 . words
