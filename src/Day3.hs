@@ -5,8 +5,6 @@ import Data.Char (isDigit)
 import Data.List
 import Data.Map.Strict (Map)
 import qualified Data.Map.Strict as M
-import Data.Set (Set)
-import qualified Data.Set as S
 
 -- Named enum used to determine whether looking for any and all symbols, or just
 -- potential gears
@@ -42,7 +40,7 @@ trawlSchematicLine
 trawlSchematicLine _ _ [] = (M.empty,[])
 trawlSchematicLine select (x,y) (c:s)
   | isDigit c = first (M.insert calculateKeyValues (read fullNumberString)) skipFewAndGo
-  | select == Any && c `S.notMember` nonsymbols = second ((x,y):) go
+  | select == Any && c `notElem` nonsymbols = second ((x,y):) go
   | select == MaybeGear && c == '*' = second ((x,y):) go
   | otherwise = go
   where
@@ -52,8 +50,9 @@ trawlSchematicLine select (x,y) (c:s)
       trawlSchematicLine select (x+length fullNumberString,y) (dropWhile isDigit s)
     go = trawlSchematicLine select (x+1,y) s
 
-nonsymbols :: Set Char
-nonsymbols = S.fromList $ '.' : ['1'..'9']
+-- String is just syntactic sugar for [Char] anyway, and this is closer to how we use it
+nonsymbols :: [Char]
+nonsymbols = '.' : ['1'..'9']
 
 -- Determine which numbers are actually part of the schematic and not just decoration
 numbersInSchematic :: Map [(Int,Int)] Int -> [(Int,Int)] -> [Int]
