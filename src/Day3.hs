@@ -16,7 +16,7 @@ data SymbolSelection = Any | MaybeGear
 part1 :: IO ()
 part1 = do
   input <- readFile "./input.txt"
-  print . sum . numbersInSchematic . trawlSchematicLines Any 0 $ lines input
+  print . sum . uncurry numbersInSchematic . trawlSchematicLines Any 0 $ lines input
 
 -- Handle looking for both part numbers and symbols of sought after kind from input
 trawlSchematicLines
@@ -56,10 +56,10 @@ nonsymbols :: Set Char
 nonsymbols = S.fromList $ '.' : ['1'..'9']
 
 -- Determine which numbers are actually part of the schematic and not just decoration
-numbersInSchematic :: (Map [(Int,Int)] Int, [(Int,Int)]) -> [Int]
-numbersInSchematic (_,[]) = []
-numbersInSchematic (partNumberMap, ((x,y):symbols)) =
-  findPartsAttachedToSymbol ++ numbersInSchematic (partNumberMap,symbols)
+numbersInSchematic :: Map [(Int,Int)] Int -> [(Int,Int)] -> [Int]
+numbersInSchematic _ [] = []
+numbersInSchematic partNumberMap ((x,y):symbols) =
+  findPartsAttachedToSymbol ++ numbersInSchematic partNumberMap symbols
   where
     findPartsAttachedToSymbol = foldl (\acc k -> (partNumberMap M.! k) : acc) [] findKeysForSymbolAdjacent
     findKeysForSymbolAdjacent = filter (not . null . intersect symbolSpaces) (M.keys partNumberMap)
@@ -68,14 +68,14 @@ numbersInSchematic (partNumberMap, ((x,y):symbols)) =
 part2 :: IO ()
 part2 = do
   input <- readFile "./input.txt"
-  print . sum . gearRatiosInSchematic . trawlSchematicLines MaybeGear 0 $ lines input
+  print . sum . uncurry gearRatiosInSchematic . trawlSchematicLines MaybeGear 0 $ lines input
 
 -- Calculate the gear ratios in the schematic, discarding invalid gears
-gearRatiosInSchematic :: (Map [(Int,Int)] Int, [(Int,Int)]) -> [Int]
-gearRatiosInSchematic (_,[]) = []
-gearRatiosInSchematic (partNumberMap, ((x,y):symbols))
-  | null findGearRatios = gearRatiosInSchematic (partNumberMap,symbols)
-  | otherwise = product findGearRatios : gearRatiosInSchematic (partNumberMap,symbols)
+gearRatiosInSchematic :: Map [(Int,Int)] Int -> [(Int,Int)] -> [Int]
+gearRatiosInSchematic _ [] = []
+gearRatiosInSchematic partNumberMap ((x,y):symbols)
+  | null findGearRatios = gearRatiosInSchematic partNumberMap symbols
+  | otherwise = product findGearRatios : gearRatiosInSchematic partNumberMap symbols
   where
     findGearRatios
       | length findGearKeys == 2 =
