@@ -1,9 +1,10 @@
 { pkgs ? import <nixpkgs> {} }:
 pkgs.haskellPackages.developPackage {
   root = ./.;
-  modifier =drv:
+  modifier = drv:
     pkgs.haskell.lib.addBuildTools drv (with pkgs.haskellPackages;
     [ cabal-install
       ghcid
+      haskell-language-server
     ]);
 }
