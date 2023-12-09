@@ -61,25 +61,44 @@ readHand First stringCards
     cards = map (readCard First) stringCards
     groupedCards = group $ sort cards
 readHand Second stringCards
-  | length groupedCards == 1 = FiveOfAKind cards
-  | any (inRange 4 numberOfJokers . length) groupedCards = FourOfAKind cards
-  | any (inRange 3 numberOfJokers . length) groupedCards =
+  -- If we only have one type of card (plus Jokers)
+  | length groupedCards == 1 || numberOfJokers == 5 = FiveOfAKind cards
+  -- If we have four of one type of card plus Jokers
+  | any ((==4-numberOfJokers) . length) groupedCards = FourOfAKind cards
+  -- And here is where the fun begins...
+  --
+  -- Should we have three cards of a type, or be able to reach that number
+  -- with the help of Jokers...
+  | any ((==3-numberOfJokers) . length) groupedCards =
+      -- we will have used up our Jokers, as any more Jokers we would have
+      -- used to get a Four of a Kind. So now we must have a spare pair
+      -- for the Full House.
+      --
+      -- We have specifically two types of cards aside from Jokers, so one has
+      -- to be a pair in case of Full House
       if length groupedCards == 2
         then FullHouse cards
         else ThreeOfAKind cards
-  | any (inRange 2 numberOfJokers . length) groupedCards =
-      if length groupedCards == 3-numberOfJokers
+  -- And if we have potential for a pair...
+  -- We can only have one Joker, lest we immediately reach for a Three
+  -- of a Kind. This is good to remember.
+  | any ((==2-numberOfJokers) . length) groupedCards =
+      -- And so, should we have
+      --   3 kinds of cards, no Jokers -> There have to be two pairs
+      --     since we do not have a Three of a Kind
+      --   4 kinds and a Joker -> We have to have at least a pair, and
+      --     then... dammit, that's another Three of a Kind. As such,
+      --     it is impossible to have anything but the above for a Two Pair!
+      if length groupedCards == 3
         then TwoPair cards
         else OnePair cards
+  -- Out of that madness, this is all that is left.
   | otherwise = HighCard cards
   where
     cards = map (readCard Second) stringCards
     numberOfJokers = length $ filter (==Joker) cards
     cardsNoJokers = filter (/=Joker) cards
     groupedCards = group $ sort cardsNoJokers
-
-inRange :: Int -> Int -> Int -> Bool
-inRange a b x = x == b-a || x == a
 
 -- Not my proudest moment, but it'll do.
 readCard :: Part -> Char -> Card
@@ -104,7 +123,6 @@ calcWinnings [] = []
 calcWinnings ((_,bid):remaining) =
   bid * (length remaining + 1) : calcWinnings remaining
 
--- This currently gives a wrong answer, copypaste at your own responsibility
 part2 :: IO ()
 part2 = do
   input <- lines <$> readFile "./input.txt"
