@@ -70,6 +70,3 @@ calculateFocusPower boxNumber slots@(lens:lenses) fPower =
   calculateFocusPower boxNumber lenses incPower
   where
     incPower = fPower + (boxNumber+1) * length slots * focalLength lens
-
-hasLabel :: Lens -> String -> Bool
-hasLabel lens label = lensLabel lens == label
