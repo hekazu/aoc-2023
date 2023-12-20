@@ -43,17 +43,19 @@ transform (((from,to),dest):stage) value
   | value >= from && value <= to = value - from + dest
   | otherwise = transform stage value
 
-part2 :: IO ()
-part2 = do
-  input <- lines <$> readFile "./input.txt"
-  let seeds = readManySeeds $ head input
-  let mappings = createMappings . dropWhile null $ dropWhile (not . null) input
-  print . minimum $ transformStages seeds mappings
-
-readManySeeds :: String -> [Int]
-readManySeeds = rangify . readSeeds
-  where
-    rangify :: [Int] -> [Int]
-    rangify [] = []
-    rangify (from:range:rest) = [from..from+range-1] ++ rangify rest
-    rangify _ = error "Odd number of seeds & ranges"
+-- Runs for too long
+--
+--part2 :: IO ()
+--part2 = do
+--  input <- lines <$> readFile "./input.txt"
+--  let seeds = readManySeeds $ head input
+--  let mappings = createMappings . dropWhile null $ dropWhile (not . null) input
+--  print . minimum $ transformStages seeds mappings
+--
+--readManySeeds :: String -> [Int]
+--readManySeeds = rangify . readSeeds
+--  where
+--    rangify :: [Int] -> [Int]
+--    rangify [] = []
+--    rangify (from:range:rest) = [from..from+range-1] ++ rangify rest
+--    rangify _ = error "Odd number of seeds & ranges"
